@@ -8,12 +8,18 @@
 
 /* Begin PBXBuildFile section */
 		69AD037A1FDA267D00DA3F65 /* XVPNManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 69AD03781FDA267D00DA3F65 /* XVPNManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		69AD03811FDA26AC00DA3F65 /* XVPNManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AD03801FDA26AC00DA3F65 /* XVPNManager.swift */; };
+		69AD03831FDA277900DA3F65 /* extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AD03821FDA277900DA3F65 /* extension.swift */; };
+		69AD03851FDA288900DA3F65 /* SFVPNManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AD03841FDA288900DA3F65 /* SFVPNManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		69AD03751FDA267D00DA3F65 /* XVPNManager.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XVPNManager.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		69AD03781FDA267D00DA3F65 /* XVPNManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XVPNManager.h; sourceTree = "<group>"; };
 		69AD03791FDA267D00DA3F65 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		69AD03801FDA26AC00DA3F65 /* XVPNManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XVPNManager.swift; sourceTree = "<group>"; };
+		69AD03821FDA277900DA3F65 /* extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = extension.swift; sourceTree = "<group>"; };
+		69AD03841FDA288900DA3F65 /* SFVPNManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SFVPNManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +53,9 @@
 			isa = PBXGroup;
 			children = (
 				69AD03781FDA267D00DA3F65 /* XVPNManager.h */,
+				69AD03801FDA26AC00DA3F65 /* XVPNManager.swift */,
+				69AD03841FDA288900DA3F65 /* SFVPNManager.swift */,
+				69AD03821FDA277900DA3F65 /* extension.swift */,
 				69AD03791FDA267D00DA3F65 /* Info.plist */,
 			);
 			path = XVPNManager;
@@ -95,6 +104,7 @@
 				TargetAttributes = {
 					69AD03741FDA267D00DA3F65 = {
 						CreatedOnToolsVersion = 9.2;
+						LastSwiftMigration = 0920;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -131,6 +141,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				69AD03811FDA26AC00DA3F65 /* XVPNManager.swift in Sources */,
+				69AD03831FDA277900DA3F65 /* extension.swift in Sources */,
+				69AD03851FDA288900DA3F65 /* SFVPNManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,6 +266,7 @@
 		69AD037E1FDA267D00DA3F65 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
@@ -266,6 +280,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.yarshure.XVPNManager;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -274,6 +289,7 @@
 		69AD037F1FDA267D00DA3F65 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				DEFINES_MODULE = YES;
