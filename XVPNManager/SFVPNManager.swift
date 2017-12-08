@@ -11,7 +11,7 @@ import NetworkExtension
 
 
 
-public class SFNETunnelProviderManager:NETunnelProviderManager {
+public extension NETunnelProviderManager {
     //var pluginType:String = "com.yarshure.Surf"
     public class func loadOrCreateDefaultWithCompletionHandler(_ completionHandler: ((NETunnelProviderManager?, Error?) -> Void)?) {
         self.loadAllFromPreferences { (managers, error) -> Void in
@@ -52,7 +52,7 @@ public class SFNETunnelProviderManager:NETunnelProviderManager {
             
             config.providerBundleIdentifier = XVPNManager.providerBundle
             config.serverAddress = XVPNManager.serverAddress
-            let manager = SFNETunnelProviderManager()
+            let manager = NETunnelProviderManager()
             manager.protocolConfiguration = config
            
             manager.localizedDescription = XVPNManager.profileName
@@ -69,9 +69,9 @@ public class SFNETunnelProviderManager:NETunnelProviderManager {
 }
 
 
-class SFVPNManager {
-    static let shared:SFVPNManager =  SFVPNManager()
-    var manager:NETunnelProviderManager?
+public class SFVPNManager {
+    public static let shared:SFVPNManager =  SFVPNManager()
+    public var manager:NETunnelProviderManager?
     var proVersion:String = ""
     var config:String = ""
     var loading:Bool = false
@@ -111,7 +111,7 @@ class SFVPNManager {
             }
         }
     }
-    func loadManager(_ completionHandler: ((NETunnelProviderManager?, Error?) -> Void)?) {
+    public func loadManager(_ completionHandler: ((NETunnelProviderManager?, Error?) -> Void)?) {
         
         if let m = manager {
             if let handler = completionHandler{
@@ -121,7 +121,7 @@ class SFVPNManager {
             //self.xpc()
         }else {
             loading = true
-            SFNETunnelProviderManager.loadOrCreateDefaultWithCompletionHandler { [weak self] (manager, error) -> Void in
+            NETunnelProviderManager.loadOrCreateDefaultWithCompletionHandler { [weak self] (manager, error) -> Void in
                 if let m = manager {
                     self!.manager = manager
                     if let handler = completionHandler{
@@ -281,12 +281,7 @@ class SFVPNManager {
     func enabledToggled(_ start:Bool) {
         if let m = manager {
             m.isEnabled = true
-            let bId = Bundle.main.infoDictionary!["CFBundleIdentifier"] as! String
-            if bId == "com.yarshure.Surf" {
-                m.localizedDescription = "Surfing"
-            }else {
-                m.localizedDescription = "Surfing Today"
-            }
+            
             m.saveToPreferences {  error in
                 guard error == nil else {
                     //self.enabledSwitch.on = self.targetManager.enabled

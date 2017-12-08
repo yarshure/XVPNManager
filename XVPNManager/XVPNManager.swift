@@ -17,10 +17,10 @@ public class XVPNManager {
     static var profileName:String = "Surfing"
     static var isSetup:Bool = false
     public static func setup(bundle:String,provider:String,serverAddress:String,pName:String,config:[String:Any]?){
-        mainBundle = bundle
-        providerBundle = provider
-        providerConfig = config
-        profileName = pName
+        self.mainBundle = bundle
+        self.providerBundle = provider
+        self.providerConfig = config
+        self.profileName = pName
         isSetup = true
     }
 }

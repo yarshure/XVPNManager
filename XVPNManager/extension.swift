@@ -19,7 +19,7 @@ extension NEVPNStatus: CustomStringConvertible {
         case .reasserting: return "Reconnecting"
         }
     }
-    public var titleForButton:String {
+    public var title:String {
         switch self{
         case .disconnected:
             
