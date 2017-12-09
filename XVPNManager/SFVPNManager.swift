@@ -9,6 +9,13 @@
 import Foundation
 import NetworkExtension
 
+struct XVPNError: Error {
+    enum ErrorKind {
+        case notActive
+        case noManager
+    }
+    let kind:ErrorKind
+}
 
 
 public extension NETunnelProviderManager {
@@ -31,43 +38,58 @@ public extension NETunnelProviderManager {
                             
                             
                         }
-                        
-                        
                         if m == nil {
                             m = managers[0]
                         }
-                        print("manager \(managers.count) \(String(describing: m?.protocolConfiguration))")
+                        print("manager \(managers.count) \n Config:\(String(describing: m!.protocolConfiguration!))")
                         completionHandler(m, nil)
 
                         
                         
                     }
                     return
+                }else {
+                    completionHandler?(nil, nil)
                 }
+            }else {
+                //create
+                completionHandler?(nil, nil)
             }
             
-            let config = NETunnelProviderProtocol()
-            config.providerConfiguration = XVPNManager.providerConfig
             
-            
-            config.providerBundleIdentifier = XVPNManager.providerBundle
-            config.serverAddress = XVPNManager.serverAddress
-            let manager = NETunnelProviderManager()
-            manager.protocolConfiguration = config
-           
-            manager.localizedDescription = XVPNManager.profileName
-            manager.saveToPreferences(completionHandler: { (error) -> Void in
-                if let completionHandler = completionHandler {
-                    if error != nil {
-                        //NSLog("Error: Could not create manager: %@", error)
-                    }
-                    completionHandler(manager, error)
-                }
-            })
         }
     }
+    public  func createProfile(_ providerProtocol:NETunnelProviderProtocol,_ completionHandler: ((NETunnelProviderManager?, Error?) -> Void)?) {
+        //let config = NETunnelProviderProtocol()
+        let env = XVPNManager.sharedManager
+        //config.providerConfiguration = env.providerConfig
+        //config.providerBundleIdentifier = env.providerBundle
+        //config.serverAddress = env.serverAddress
+        
+        
+       // let manager = NETunnelProviderManager()
+        self.protocolConfiguration = providerProtocol
+        self.localizedDescription = env.profileName
+        print(env.profileName)
+        self.saveToPreferences(completionHandler: { (error) -> Void in
+            if let completionHandler = completionHandler {
+                if error != nil {
+                    //NSLog("Error: Could not create manager: %@", error)
+                }
+                completionHandler(self, error)
+            }
+        })
+    }
 }
-
+public extension NETunnelProviderProtocol{
+    public func config() {
+        //let config = NETunnelProviderProtocol()
+        let env = XVPNManager.sharedManager
+        self.providerConfiguration = env.providerConfig
+        self.providerBundleIdentifier = env.providerBundle
+        self.serverAddress = env.serverAddress
+    }
+}
 
 public class SFVPNManager {
     public static let shared:SFVPNManager =  SFVPNManager()
@@ -111,6 +133,28 @@ public class SFVPNManager {
             }
         }
     }
+    public func verify (_ completionHandler: ((NETunnelProviderManager?, Error?) -> Void)?) {
+        
+        guard let _ = manager else {
+            if let handler = completionHandler{
+                handler(nil, nil)
+            }
+            return
+        }
+        loading = true
+        NETunnelProviderManager.loadOrCreateDefaultWithCompletionHandler() { [weak self] (manager, error) -> Void in
+            if let m = manager {
+                self!.manager = manager
+                if let handler = completionHandler{
+                    if m.onDemandRules == nil {
+                        //self!.addOnDemandRule([])
+                    }
+                    self!.loading = false
+                    handler(m, error)
+                }
+            }
+        }
+    }
     public func loadManager(_ completionHandler: ((NETunnelProviderManager?, Error?) -> Void)?) {
         
         if let m = manager {
@@ -121,7 +165,7 @@ public class SFVPNManager {
             //self.xpc()
         }else {
             loading = true
-            NETunnelProviderManager.loadOrCreateDefaultWithCompletionHandler { [weak self] (manager, error) -> Void in
+            NETunnelProviderManager.loadOrCreateDefaultWithCompletionHandler() { [weak self] (manager, error) -> Void in
                 if let m = manager {
                     self!.manager = manager
                     if let handler = completionHandler{
@@ -131,20 +175,29 @@ public class SFVPNManager {
                         self!.loading = false
                         handler(m, error)
                     }
+                }else {
+                    let m = NETunnelProviderManager()
+                    let p = NETunnelProviderProtocol()
+                    p.config()
+                    m.createProfile(p,{ (m, e) in
+                        guard let m = m else {
+                            completionHandler?(nil, e)
+                            return
+                        }
+                        if let handler = completionHandler{
+                            if m.onDemandRules == nil {
+                                //self!.addOnDemandRule([])
+                            }
+                            self!.loading = false
+                            handler(m, error)
+                        }
+                    })
                 }
-                
-                
-                //            self!.registerStatus()
-                //            self!.xpc()
-                //            if self!.manager.enabled == false {
-                //                self!.enabledToggled(false)
-                //            }
-                //            self!.tableView.reloadData()
-                //            mylog("\(self!.manager.protocolConfiguration)")
             }
         }
     }
-    func xpc(){
+    
+    public func xpc(_ completionHandler: @escaping ((String,Error?) -> Void)) {
         // Send a simple IPC message to the provider, handle the response.
         //AxLogger.log("send Hello Provider")
         if let m = manager {
@@ -159,19 +212,22 @@ public class SFVPNManager {
                                 let list = responseString.components(separatedBy: ":")
                                 self.session = list.last!
                                 print("Received response from the provider: \(responseString)")
+                                completionHandler(responseString,nil)
                             }
                             
                             //self.registerStatus()
                         } else {
-                            print("Got a nil response from the provider")
+                            completionHandler("Got a nil response from the provider",XVPNError.init(kind: .notActive))
                         }
                     }
-                } catch {
-                    print("Failed to send a message to the provider")
+                } catch let e {
+                    completionHandler("Failed to send a message to the provider",e)
+                    
                 }
             }
         }else {
-            print("message dont init")
+           
+            completionHandler("message dont init",XVPNError.init(kind: .noManager))
         }
         
     }
@@ -292,11 +348,14 @@ public class SFVPNManager {
                 }
                 
                 
-                m.loadFromPreferences { error in
+                m.loadFromPreferences { (error) in
                     //self.enabledSwitch.on = self.targetManager.enabled
                     //self.startStopToggle.enabled = self.enabledSwitch.on
-                    print("loadFromPreferencesWithCompletionHandler \(String(describing: error?.localizedDescription))")
-                   // self!.tableView.reloadData()
+                    if let e = error {
+                        print("loadFromPreferencesWithCompletionHandler \(String(describing: e.localizedDescription))")
+                    }
+                    
+                  
                     if start {
                         do {
                             _ = try self.startStopToggled(self.config)
@@ -313,7 +372,7 @@ public class SFVPNManager {
     
     }
     /// Handle the user toggling the "VPN" switch.
-    func startStopToggled(_ config:String) throws ->Bool{
+    public func startStopToggled(_ config:String) throws ->Bool{
         if let m = manager {
             self.config = config
             if self.config.isEmpty{
